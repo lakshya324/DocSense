@@ -2,17 +2,6 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
-import result
-import LLM.gemini
-import LLM.llama3
-import LLM.prompt
-from compare import PdfCompare
-from pdf_extractor import extract_text
-
 deployed = False
 try:
     load_dotenv()
@@ -24,6 +13,15 @@ try:
 except Exception as e:
     api_key = st.secrets["GOOGLE_API_KEY"]
     deployed = True
+
+if not deployed:
+    import result
+    import LLM.gemini
+    import LLM.llama3
+    import LLM.prompt
+from compare import PdfCompare
+from pdf_extractor import extract_text
+
 
 scans = (
     "Document-Level Cosine Similarity Scan",
@@ -112,74 +110,67 @@ if selected_page == "Home":
 
 elif selected_page == "ChatBot":
     st.title("ChatBot")
+    if not deployed:
+        if "loaded" not in st.session_state:
+            st.session_state.loaded = False
 
-    if "loaded" not in st.session_state:
-        st.session_state.loaded = False
+        if (
+            st.button(label="Load PDF", disabled=st.session_state.loaded)
+            and st.session_state.loaded == False
+            and "pdf_text1" in st.session_state
+            and "pdf_text2" in st.session_state
+        ):
+            with st.spinner("Loading PDFs to Vector DB(It may takes sometime)..."):
+                result.load_pdf(st.session_state.pdf_text1, st.session_state.pdf_text2)
+            st.session_state.loaded = True
 
-    if (
-        st.button(label="Load PDF", disabled=st.session_state.loaded)
-        and st.session_state.loaded == False
-        and "pdf_text1" in st.session_state
-        and "pdf_text2" in st.session_state
-    ):
-        with st.spinner("Loading PDFs to Vector DB(It may takes sometime)..."):
-            result.load_pdf(st.session_state.pdf_text1, st.session_state.pdf_text2)
-        st.session_state.loaded = True
+        # Chatbot interaction
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-    # Chatbot interaction
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    with st.form(key="chat_form"):
-        user_input = st.text_input("You: ", "")
-        # radio button
-        if deployed:
-            radio_button = st.radio(
-                "Choose LLM Model:",
-                ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
-                index=1,
-                horizontal=True,
-                disabled=True,
-            )
-        else:
+        with st.form(key="chat_form"):
+            user_input = st.text_input("You: ", "")
+            # radio button
             radio_button = st.radio(
                 "Choose LLM Model:",
                 ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
                 index=1,
                 horizontal=True,
             )
-        submit_button = st.form_submit_button(
-            label="Send", disabled=not (st.session_state.loaded)
-        )
-        if submit_button and user_input and st.session_state.loaded:
-            st.session_state.messages.insert(0, f"You: {user_input}")
-
-            with st.spinner("Finding relevant data from PDFs..."):
-                vectors = result.query(user_input)
-                prompt = LLM.prompt.prompt(question=user_input, vectors=vectors)
-            with st.spinner("Bot is typing..."):
-                if radio_button == "LLAMA 3 (8B) LLM":
-                    bot_response = LLM.llama3.llama3(prompt)
-                else:
-                    bot_response = LLM.gemini.gemini(prompt)
-
-            # Placeholder for chatbot response (replace with actual chatbot logic)
-            bot_response = f"Bot: {bot_response}"
-            st.session_state.messages.insert(0, bot_response)
-
-    # Display the chat history
-    for message in st.session_state.messages:
-        if message.startswith("You:"):
-            styled_message = message.replace(
-                "You:", "<b style='color: red;'>You:</b>\t"
+            submit_button = st.form_submit_button(
+                label="Send", disabled=not (st.session_state.loaded)
             )
-            st.markdown(
-                f"<div style='text-align: right; background-color: #2f2f2f; padding: 5px; border-radius: 25px;'>{styled_message}</div>",
-                unsafe_allow_html=True,
-            )
-        else:
-            styled_message = message.replace(
-                "Bot:", "<b style='color: green;'>Bot:</b>\t"
-            )
-            st.markdown(styled_message, unsafe_allow_html=True)
-        # st.markdown("---")
+            if submit_button and user_input and st.session_state.loaded:
+                st.session_state.messages.insert(0, f"You: {user_input}")
+
+                with st.spinner("Finding relevant data from PDFs..."):
+                    vectors = result.query(user_input)
+                    prompt = LLM.prompt.prompt(question=user_input, vectors=vectors)
+                with st.spinner("Bot is typing..."):
+                    if radio_button == "LLAMA 3 (8B) LLM":
+                        bot_response = LLM.llama3.llama3(prompt)
+                    else:
+                        bot_response = LLM.gemini.gemini(prompt)
+
+                # Placeholder for chatbot response (replace with actual chatbot logic)
+                bot_response = f"Bot: {bot_response}"
+                st.session_state.messages.insert(0, bot_response)
+
+        # Display the chat history
+        for message in st.session_state.messages:
+            if message.startswith("You:"):
+                styled_message = message.replace(
+                    "You:", "<b style='color: red;'>You:</b>\t"
+                )
+                st.markdown(
+                    f"<div style='text-align: right; background-color: #2f2f2f; padding: 5px; border-radius: 25px;'>{styled_message}</div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                styled_message = message.replace(
+                    "Bot:", "<b style='color: green;'>Bot:</b>\t"
+                )
+                st.markdown(styled_message, unsafe_allow_html=True)
+            # st.markdown("---")
+    else:
+        st.write("Chatbot is disabled in deployed mode.")
