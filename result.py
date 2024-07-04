@@ -28,6 +28,6 @@ def query(query:str,n_results=15):
     
     output=[]
     for i in results:
-        output.append(f"from Pdf {results["metadatas"][i]["pdf"]+1} : {results['documents'][i]}")
+        output.append(f"from PDF {results["metadatas"][i]["pdf"]+1} : {results['documents'][i]}")
     
     return output
