@@ -14,7 +14,7 @@ except Exception as e:
     api_key = st.secrets["GOOGLE_API_KEY"]
     deployed = True
 
-if not deployed:
+if deployed:
     import result
     import LLM.gemini
     import LLM.llama3
