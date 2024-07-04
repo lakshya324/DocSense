@@ -2,13 +2,9 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-deployed = False
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
-try:
-    deployed = st.secrets["DEPLOYED"]
-except Exception as e:
-    deployed = False
+deployed = (os.getenv("DEPLOYED")) == "True"
 
 if not deployed:
     import result
@@ -28,7 +24,7 @@ scans = (
 # Create a sidebar for navigation
 with st.sidebar:
     st.title("Navigation")
-    selected_page = st.radio("Go to", ["Home", "ChatBot"])
+    selected_page = st.radio("Go to", ["Home", "ChatBot"],key="page")
 
 # HOME PAGE
 if selected_page == "Home":
@@ -48,6 +44,7 @@ if selected_page == "Home":
         scans,
         horizontal=True,
         captions=["upto 5mins", "upto 5mins", "upto 5mins"],
+        key="scans",
     )
 
     if option:
@@ -74,6 +71,7 @@ if selected_page == "Home":
             index=0,
             horizontal=True,
             captions=["", "", "Method with Longer Processing Time"],
+            key="vector",
         )
 
     # * Submit button
@@ -98,8 +96,13 @@ if selected_page == "Home":
                     similarity = pdf_compare.moderate_scan(embed)
                 elif option == scans[2]:
                     similarity = pdf_compare.thorough_scan(embed)
-
-                st.write(f"Similarity Score: {similarity}")
+                
+                if similarity > 0.5:
+                    st.success("The PDFs are similar.")
+                else:
+                    st.error("The PDFs are not similar.")
+                st.progress(int(similarity * 100))
+                st.title(f"Similarity Score: {similarity:.2f}")
             else:
                 st.error("Please upload PDFs to compare.")
 
@@ -132,6 +135,7 @@ elif selected_page == "ChatBot":
                 ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
                 index=1,
                 horizontal=True,
+                key="llm_model",
             )
             submit_button = st.form_submit_button(
                 label="Send", disabled=not (st.session_state.loaded)
