@@ -23,11 +23,13 @@ def load_pdf(pdf1, pdf2):
         )
 
 
-def query(query:str,n_results=15):
-    results = collection.query([query], n_results=n_results)[0]
-    
-    output=[]
-    for i in results:
-        output.append(f"from PDF {results["metadatas"][i]["pdf"]+1} : {results['documents'][i]}")
-    
+def query(query: str, n_results=10):
+    results = collection.query(query_texts=[query], n_results=n_results)
+
+    output = []
+    for i in range(n_results):
+        output.append(
+            f"from PDF {results['metadatas'][0][i]['pdf']+1} : {results['documents'][0][i]}"
+        )
+
     return output

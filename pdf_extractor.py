@@ -11,6 +11,7 @@
 
 import PyPDF2
 
+
 def extract_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     num_pages = len(pdf_reader.pages)
