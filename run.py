@@ -11,6 +11,10 @@ if not deployed:
     import LLM.gemini
     import LLM.llama3
     import LLM.prompt
+if deployed:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from compare import PdfCompare
 from pdf_extractor import extract_text
 
