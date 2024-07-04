@@ -13,6 +13,11 @@ load_dotenv()
 
 # Google API Key
 api_key = os.getenv("GOOGLE_API_KEY")
+deployed = False
+if not api_key:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    deployed = True
+
 scans = (
     "Document-Level Cosine Similarity Scan",
     "Sentence-Level Cosine Similarity Scan",
@@ -126,6 +131,7 @@ elif selected_page == "ChatBot":
             ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
             index=1,
             horizontal=True,
+            disabled=[not (deployed), True],
         )
         submit_button = st.form_submit_button(
             label="Send", disabled=not (st.session_state.loaded)
