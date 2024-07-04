@@ -4,7 +4,6 @@ chromadb
 langchain
 langchain_community
 google-generativeai
-re
 nltk
 PyPDF2
 scikit-learn
