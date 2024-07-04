@@ -9,12 +9,15 @@ import LLM.prompt
 from compare import PdfCompare
 from pdf_extractor import extract_text
 
-load_dotenv()
-
-# Google API Key
-api_key = os.getenv("GOOGLE_API_KEY")
 deployed = False
-if not api_key:
+try:
+    load_dotenv()
+
+    # Google API Key
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise Exception("API Key not found")
+except Exception as e:
     api_key = st.secrets["GOOGLE_API_KEY"]
     deployed = True
 
@@ -126,13 +129,21 @@ elif selected_page == "ChatBot":
     with st.form(key="chat_form"):
         user_input = st.text_input("You: ", "")
         # radio button
-        radio_button = st.radio(
-            "Choose LLM Model:",
-            ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
-            index=1,
-            horizontal=True,
-            disabled=[not (deployed), True],
-        )
+        if deployed:
+            radio_button = st.radio(
+                "Choose LLM Model:",
+                ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
+                index=1,
+                horizontal=True,
+                disabled=True,
+            )
+        else:
+            radio_button = st.radio(
+                "Choose LLM Model:",
+                ["LLAMA 3 (8B) LLM", "Google Gemini LLM"],
+                index=1,
+                horizontal=True,
+            )
         submit_button = st.form_submit_button(
             label="Send", disabled=not (st.session_state.loaded)
         )
