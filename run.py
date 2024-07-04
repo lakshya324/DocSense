@@ -3,18 +3,14 @@ import streamlit as st
 from dotenv import load_dotenv
 
 deployed = False
+load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
 try:
-    load_dotenv()
-
-    # Google API Key
-    api_key = os.getenv("GOOGLE_API_KEY")
-    if not api_key:
-        raise Exception("API Key not found")
+    deployed = st.secrets["DEPLOYED"]
 except Exception as e:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    deployed = True
+    deployed = False
 
-if deployed:
+if not deployed:
     import result
     import LLM.gemini
     import LLM.llama3
