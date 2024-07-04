@@ -1,6 +1,7 @@
 python-dotenv
 streamlit
 chromadb
+langchain
 langchain_community
 google-generativeai
 re
