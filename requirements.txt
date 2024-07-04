@@ -1,4 +1,4 @@
-dotenv
+python-dotenv
 streamlit
 chromadb
 langchain_community
