@@ -16,8 +16,8 @@ This project provides a web application for comparing PDF documents using differ
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/lakshya324/pdf-compare-chatbot.git
-    cd pdf-compare-chatbot
+    git clone https://github.com/lakshya324/DocSense.git
+    cd DocSense
     ```
 
 2. **Install the required packages**:
