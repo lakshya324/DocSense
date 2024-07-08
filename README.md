@@ -1,4 +1,4 @@
-# PDF Comparison and ChatBot Application
+# DocSense - Smart PDF Comparison and Analysis
 
 ![Project Image](images/readme.png)
 
